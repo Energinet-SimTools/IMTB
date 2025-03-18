@@ -20,4 +20,8 @@ The expected application of the IMTB is for model verification and small-signal 
 ## User Guide
 Find the complete user guide and computation description [here](https://github.com/Energinet-SimTools/MTB/wiki).
 
+## Contributions
+We welcome contributions! To contribute, please file an issue via the IMTB [issues tab](https://github.com/Energinet-SimTools/IMTB/issues). You can report bugs, request features, or suggest improvements. Before submitting, please check for any known issues.
+
 ## Contact
+For inquiries, please contact the Energinet simulation model team: simuleringsmodeller@energinet.dk
