@@ -17,6 +17,8 @@ The expected application of the IMTB is for model verification and small-signal 
 ## User Guide
 Find the complete user guide and computation description in the [IMTB Wiki Home page](https://github.com/Energinet-SimTools/IMTB/wiki).
 
+IMTB packaged version and exmaples are available under [IMTB release](https://github.com/Energinet-SimTools/IMTB/releases).
+
 ## Considerations and terms of use 
 We welcome use of the IMTB. Considerations and terms of use are described under [License](https://github.com/Energinet-SimTools/IMTB?tab=License-1-ov-file).
 
