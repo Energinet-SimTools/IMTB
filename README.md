@@ -1,5 +1,5 @@
 # Immitance Measurement ToolBox (IMTB)
-The Immitance Measurement ToolBox (IMTB) is an electrical system dynamic analysis tool developed by Energinet, the Danish transmission system opeartor. It is an automated toolbox that can be added in the electrical point of connection (PoC) of a circuit and measures the immittance (impedance or admittance) of the device under test (DUT) and/or the network (NET), as described in figure below. The toolbox is implemented in the electromagnetic transient (EMT) simulation platform using PSCAD and automated via Python scripts. It allows users to input parameters via graphic user interface (GUI), and all the immittance scan results are archived in data and plot formats. 
+The Immitance Measurement ToolBox (IMTB) is an electrical system dynamic analysis tool developed by Energinet, the Danish transmission system operator. It is an automated toolbox that can be added in the electrical point of connection (PoC) of a circuit and measures the immittance (impedance or admittance) of the device under test (DUT) and/or the network (NET), as described in figure below. The toolbox is implemented in the electromagnetic transient (EMT) simulation platform using PSCAD and automated via Python scripts. It allows users to input parameters via graphic user interface (GUI), and all the immittance scan results are archived in data and plot formats. 
 
 ![Conceptual Description of Immitance Measurement ToolBox (IMTB)](https://github.com/user-attachments/assets/19bd1c11-2e4d-4250-b2d5-7b71b2fbcf1d)
 
@@ -17,7 +17,7 @@ The expected application of the IMTB is for model verification and small-signal 
 ## User Guide
 Find the complete user guide and computation description in the [IMTB Wiki Home page](https://github.com/Energinet-SimTools/IMTB/wiki).
 
-IMTB packaged version and exmaples are available under [IMTB release](https://github.com/Energinet-SimTools/IMTB/releases).
+IMTB packaged version and examples are available under [IMTB release](https://github.com/Energinet-SimTools/IMTB/releases).
 
 ## Considerations and terms of use 
 We welcome use of the IMTB. Considerations and terms of use are described under [License](https://github.com/Energinet-SimTools/IMTB?tab=License-1-ov-file).
