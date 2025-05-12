@@ -1,7 +1,7 @@
-# Immitance Measurement ToolBox (IMTB)
-The Immitance Measurement ToolBox (IMTB) is an electrical system dynamic analysis tool developed by Energinet, the Danish transmission system operator. It is an automated toolbox that can be added in the electrical point of connection (PoC) of a circuit and measures the immittance (impedance or admittance) of the device under test (DUT) and/or the network (NET), as described in figure below. The toolbox is implemented in the electromagnetic transient (EMT) simulation platform using PSCAD and automated via Python scripts. It allows users to input parameters via graphic user interface (GUI), and all the immittance scan results are archived in data and plot formats. 
+# Immittance Measurement ToolBox (IMTB)
+The Immittance Measurement ToolBox (IMTB) is an electrical system dynamic analysis tool developed by Energinet, the Danish transmission system operator. It is an automated toolbox that can be added in the electrical point of connection (PoC) of a circuit and measures the immittance (impedance or admittance) of the device under test (DUT) and/or the network (NET), as described in figure below. The toolbox is implemented in the electromagnetic transient (EMT) simulation platform using PSCAD and automated via Python scripts. It allows users to input parameters via graphic user interface (GUI), and all the immittance scan results are archived in data and plot formats. 
 
-![Conceptual Description of Immitance Measurement ToolBox (IMTB)](https://github.com/user-attachments/assets/19bd1c11-2e4d-4250-b2d5-7b71b2fbcf1d)
+![Conceptual Description of Immittance Measurement ToolBox (IMTB)](https://github.com/user-attachments/assets/19bd1c11-2e4d-4250-b2d5-7b71b2fbcf1d)
 
 ## Features
 The IMTB v1.0 has the following key features:
