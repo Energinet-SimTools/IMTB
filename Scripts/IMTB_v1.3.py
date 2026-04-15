@@ -6,6 +6,7 @@ Immitance Measurement ToolBox (IMTB) main routine.
 
 Update history:
     21 Mar 2025 - v1.0 - first public version
+    15 Apr 2026 - v1.3 - second public version
     
 """
 
@@ -13,7 +14,7 @@ Update history:
 # IMTB version
 # =============================================================================
 
-settings = {"IMTB version":"1.0",}
+settings = {"IMTB version":"1.3",}
 
 # =============================================================================
 # Handling of errors for packaged version (can be excluded for IDE use)

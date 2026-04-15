@@ -6,6 +6,8 @@ Subscript of IMTB to run the simulations
 
 Update history:
     21 Mar 2025 - v1.0 - first public version
+    21 Jul 2025 - v1.1 - update freqeuncy series creation method, now by default using "REMOVE_HARMONIC_INJ = True"  
+    04 Mar 2026 - v1.3 - bug fix with complete(log) or complete(truelog) when auto plot timestep is disabled
     
 """
 # =============================================================================
@@ -70,7 +72,7 @@ COMPLETE_NUM_POINTS = 50 # for truelog
 # COMPLETE_FREQSTOP = 2500
 
 # Removes scanning at harmonics, due to errors based on harmonic injection
-REMOVE_HARMONIC_INJ = False
+REMOVE_HARMONIC_INJ = True
 
 # =============================================================================
 # Internal functions
@@ -135,6 +137,10 @@ def get_single_type_finj(settings, freqstart,freqstop,freqstep,f0,resolution_typ
                 for fk in f_inj1:
                     if fk % f0 == 0:
                         f_inj1.remove(fk)
+                        if fk-1 not in f_inj1:
+                            f_inj1.append(fk-1)
+                        if fk+1 not in f_inj1 and fk+1 <= float(freqstop):
+                            f_inj1.append(fk+1)
             else:
                 if settings["Injection components"] == "dq":
                     f_inj1.remove(0)
@@ -146,8 +152,14 @@ def get_single_type_finj(settings, freqstart,freqstop,freqstep,f0,resolution_typ
                     for fk in f_inj1:
                         if fk % f0 == 0 and fk < 200:
                             f_inj1.remove(fk)
+                            if fk-1 not in f_inj1:
+                                f_inj1.append(fk-1)
+                            if fk+1 not in f_inj1 and fk+1 <= float(freqstop):
+                                f_inj1.append(fk+1)
         except:
             pass
+        
+        f_inj1.sort()
         
     elif resolution_type == 'log':
         f_inj1 = []
@@ -169,11 +181,18 @@ def get_single_type_finj(settings, freqstart,freqstop,freqstep,f0,resolution_typ
         while f<=float(freqstop):
             # appending to overall list if not f0
             if REMOVE_HARMONIC_INJ:
-                if f % f0 != 0:
+                if f % f0 != 0 and (f not in f_inj1):
                     f_inj1.append(f)
+                else:
+                    if f-1 not in f_inj1:
+                        f_inj1.append(f-1)
+                        if f+1 <= float(freqstop):
+                            f_inj1.append(f+1)
+
             else:
                 if f != f0 or f != 2*f0 or f != 3*f0:
                     f_inj1.append(f)
+                    
                             
             # adjusting the frequency for next step
             # adding one sci int
@@ -185,7 +204,9 @@ def get_single_type_finj(settings, freqstart,freqstop,freqstep,f0,resolution_typ
                 
             # rounding f to get round values and get last frequency
             f = np.round(f,ROUNDING_TO_EXP_FREQ)
-            
+        
+        f_inj1.sort()
+        
     elif resolution_type == 'truelog':
         start_neg = freqstart<0
         if start_neg:
@@ -208,6 +229,10 @@ def get_single_type_finj(settings, freqstart,freqstop,freqstep,f0,resolution_typ
                 for fk in f_inj1:
                     if fk % f0 == 0:
                         f_inj1.remove(fk)
+                        if fk-1 not in f_inj1:
+                            f_inj1.append(fk-1)
+                        if fk+1 not in f_inj1 and fk+1 <= float(freqstop):
+                            f_inj1.append(fk+1)
             else:
                 if settings["Injection components"] == "dq":
                     f_inj1.remove(0)
@@ -219,6 +244,10 @@ def get_single_type_finj(settings, freqstart,freqstop,freqstep,f0,resolution_typ
                     for fk in f_inj1:
                         if fk % f0 == 0 and fk < 200:
                             f_inj1.remove(fk)
+                            if fk-1 not in f_inj1:
+                                f_inj1.append(fk-1)
+                            if fk+1 not in f_inj1 and fk+1 <= float(freqstop):
+                                f_inj1.append(fk+1)
         except:
             pass
         
@@ -370,7 +399,13 @@ def setupfreqs(settings):
             f_inj = np.append(np.array([0,]),np.append(f_inj1,f_inj2))
             
         # Changing settings plot timestep and returning lists
-        settings["Plot timestep"] = get_plot_timestep(settings["Freq stop"])
+        auto_plotstep = get_plot_timestep(settings["Freq stop"])
+        if settings["Plot timestep"] > auto_plotstep:
+            if auto_plotstep % settings["Solution timestep"] == 0:
+                settings["Plot timestep"] = get_plot_timestep(settings["Freq stop"])
+            else:
+                settings["Plot timestep"] = settings["Solution timestep"]
+
         
         return f_inj
     
@@ -438,7 +473,13 @@ def setupfreqs(settings):
             f_inj = np.append(np.array([0,]),np.append(f_inj1,f_inj2))
             
         # Changing settings plot timestep and returning lists
-        settings["Plot timestep"] = get_plot_timestep(settings["Freq stop"])
+        # settings["Plot timestep"] = get_plot_timestep(settings["Freq stop"])
+        auto_plotstep = get_plot_timestep(settings["Freq stop"])
+        if settings["Plot timestep"] > auto_plotstep:
+            if auto_plotstep % settings["Solution timestep"] == 0:
+                settings["Plot timestep"] = get_plot_timestep(settings["Freq stop"])
+            else:
+                settings["Plot timestep"] = settings["Solution timestep"]
         
         return f_inj
     elif settings["Freq range"]=="linear+linear":
@@ -599,7 +640,7 @@ def pscad_licensing(settings, pscad):
         try:
             pscad.settings({"cl_exit_behaviour":0})
         except:
-            print("Remeber to close license after use")
+            print("Remember to close license after use")
             
         # Release certificate if already exists
         pscad.release_certificate()
@@ -887,7 +928,7 @@ def run(settings):
                                     "description":settings["simname"] + ":snapshot",
                                     "time_duration":settings["Snapshot time"],
                                     "time_step":settings["Solution timestep"],
-                                    "sample_step":SNAPSHOT_PLOTSTEP,#settings["Plot timestep"], # override because not saved data
+                                    "sample_step":SNAPSHOT_PLOTSTEP,# settings["Plot timestep"], # override because not saved data
                                     "StartType":"0",
                                     "PlotType":"0",
                                     "SnapType":"1",
