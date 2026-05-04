@@ -10,7 +10,11 @@ The IMTB v1.0 has the following key features:
 -	SISO and MIMO scan, which means that the toolbox can support single-input single-out (SISO) immittance scan and multi-input multi-out (MIMO) immittance matrix/transfer function scan.
 -	Multiple core simulation, which allows users to apply multiple cores for parallel simulation and improved simulation speed. 
 -	Multiple scenario simulation, which allows users to automatize scans of different operating points.
--	Customed frequency resolution combinations, which allows users to apply customed frequency resolution combinations in different frequency ranges.  
+-	Customed frequency resolution combinations, which allows users to apply customed frequency resolution combinations in different frequency ranges.
+
+A pre-release version of IMTB v1.3 is available here [IMTB_v1.3 (pre-release)](https://github.com/Energinet-SimTools/IMTB/releases/tag/v1.3-rc), with the following new features:
+- MIMO Jacobian matrix scan, with extended formats including P-θ, P-f and P-df/dt responses
+- MIMO impedance passivity index calculation and plots
 
 The expected application of the IMTB is for model verification and small-signal stability analysis based on EMT models. The tool is implemented with open Python scripts, which can ease the further development and extended application with other tools.
 
