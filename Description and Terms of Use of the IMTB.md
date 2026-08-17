@@ -1,0 +1,49 @@
+# Description of the Immittance Measurement ToolBox (IMTB)
+This document describes the Immittance Measurement ToolBox (IMTB) developed by Energinet, including its features, implementation principles and user manual, followed by examples. This toolbox is intended to be published in GitHub, and the information in this document will also be published on the GitHub website [Energinet-SimTools/IMTB: Energinet's Immitance Measurement ToolBox](https://github.com/Energinet-SimTools/IMTB). 
+
+## Terms of Use of the IMTB
+Energinet provides the IMTB for the purpose of developing an open-source frequency-domain scanning test bench for electrical facility’s model benchmarking or validation and for power system small-signal stability analysis. The tool is developed by power system engineers based on existing knowledge that can be found in literature, with a focus on industrial oriented features and at the time of development, with a non-commercial purpose.
+
+The IMTB is licensed under the Mozilla Public License 2.0 (MPL-2.0). See [LICENSE](https://github.com/Energinet-SimTools/IMTB?tab=License-1-ov-file) for details. Any use of the IMTB is done under the following considerations: 
+
+•	Any use of the IMTB is done at the at the user’s own risk and responsibility, including software incompatibilities or other complications. 
+
+•	Any results from the use of the IMTB are indicative only – use of the results and its accuracy hereof is done at the user’s own risk and should be reviewed and validated professionally. 
+
+•	Any ownership rights and intellectual property rights for the results of the use of the IMTB are done on the user’s own responsibility – the user must itself resolve any such potential conflicts.
+
+# Features
+The IMTB is an automated toolbox that can be added in the electrical point of connection (PoC) of a circuit and measures the immittance (impedance or admittance) of the device under test (DUT) and/or the network (NET), as described in Figure 1. The toolbox is implemented in the Electromagnetic Transient (EMT) simulation platform using PSCAD, and automated via Python scripts. It allows users to input parameters via graphic user interface (GUI), and all the immittance scan results are archived in data and plot formats. 
+
+![Conceptual Description of Immittance Measurement ToolBox (IMTB)](https://github.com/user-attachments/assets/19bd1c11-2e4d-4250-b2d5-7b71b2fbcf1d)
+
+The IMTB v1.3 has the following key features:
+
+•	Single unit test, which means that only one toolbox can be added in simulation tests. However, it can scan immittances for both sides, i.e., the DUT side and the NET side.
+
+•	AC and DC scan, which means that the toolbox supports both immittance measurement at AC and DC PoCs.
+
+•	SISO and MIMO scan, which means that the toolbox can support single-input single-out (SISO) immittance scan and multi-input multi-out (MIMO) immittance matrix/transfer function scan.
+
+•	Multiple core simulation, which allows users to apply multiple cores for parallel simulation and improved simulation speed. 
+
+•	Multiple scenario simulation, which allows users to automatize scans of different operating points of the DUT.
+
+•	Customed frequency resolution combinations, which allows users to apply customed frequency resolution combinations in different frequency ranges.
+
+• MIMO Jacobian matrix scan, with extended formats including P-θ, P-f and P-df/dt responses.
+
+• MIMO impedance passivity index calculation and plots.
+
+The expected application of the IMTB is for model verification and small-signal stability analysis based on EMT models. The tool is implemented with open Python scripts, which can ease the further development and extended application with other tools.
+
+## User Guide
+Find the complete user guide and computation description in the [IMTB Wiki Home page](https://github.com/Energinet-SimTools/IMTB/wiki)
+
+IMTB packaged version and examples are available under [IMTB release](https://github.com/Energinet-SimTools/IMTB/releases)
+
+## Contributions
+We welcome contributions! To contribute, please file an issue via the IMTB [Issues tab](https://github.com/Energinet-SimTools/IMTB/issues). You can report bugs, request features, or suggest improvements. Before submitting, please check for any known issues.
+
+## Contact
+For inquiries, please contact the Energinet simulation model team: simuleringsmodeller@energinet.dk
