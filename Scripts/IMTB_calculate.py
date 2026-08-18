@@ -974,8 +974,8 @@ def get_Yf(f,fs,y_window):
         # Y_f = IM.get_FFT_at_f_v2(f_fft, Y_fft, f)
     
         # Using DFT at single frequency
-        Y_f = IM.DFT_1f(y_window, fs, f) # new version
-        
+        f_rounded = round(f,ROUNDING_TO_EXP_FREQ)
+        Y_f = IM.DFT_1f(y_window, fs, f_rounded) # new version
         
         return Y_f
 
