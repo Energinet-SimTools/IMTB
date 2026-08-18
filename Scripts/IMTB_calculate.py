@@ -8,8 +8,9 @@ Update history:
     21 Mar 2025 - v1.0 - first public version
     21 Jul 2025 - v1.1 - update plot time step check, in case scripts cannot change this parameter in some user models
     15 Oct 2025 - v1.2 - update Jacobian matrix calculation, including P-f scan
-    12 Mar 2026 - v1.3 - update Jacobian matrix calculation, including P-df/dt scan
-                       - add MIMO passivity calculation
+    12 Mar 2026 - v1.3rc - update Jacobian matrix calculation, including P-df/dt scan
+                         - add MIMO passivity calculation
+    30 Jul 2026 - v1.3 - bug fix for frequency rounding issue, enabling scan settings using floating number resolution. 
 
     
 """
@@ -1096,10 +1097,6 @@ def IMTB_AC_Zab_MIMO(data_pos, data_neg, f, phi_f0, settings, calc_NET=False):
     fs = settings["fs"]
     f0 = float(settings["Fundamental freq"])
     
-        
-    fs = settings["fs"]
-    f0 = float(settings["Fundamental freq"])
-    
     if calc_NET:
         print('NET side impedance calculation:')
         ialpha1 = _get_alpha(data_pos[6], data_pos[7], data_pos[8])
@@ -1139,11 +1136,10 @@ def IMTB_AC_Zab_MIMO(data_pos, data_neg, f, phi_f0, settings, calc_NET=False):
     
     Vmat = np.array([[Vab1_inj1,Vab1_inj2],[Vab2_inj1,Vab2_inj2]]) 
     Imat = np.array([[Iab1_inj1,Iab1_inj2],[Iab2_inj1,Iab2_inj2]]) 
-    # print(Vmat)
-    # print(Imat)
-    
+
+   
     Zab = np.matmul(Vmat,lnlg.inv(Imat))
-    # print(Zab)
+
     
     return Zab
 
@@ -1152,7 +1148,7 @@ def IMTB_AC_Zdq_MIMO(data_pos, data_neg, f, phi_f0, settings, calc_NET=False):
     fs = settings["fs"]
     f0 = float(settings["Fundamental freq"])
     # time_start = settings["time_start"]
-    # print(f0)
+
     if calc_NET:
         print('NET side impedance calculation:')
         ialpha1 = _get_alpha(data_pos[6], data_pos[7], data_pos[8])
@@ -1175,7 +1171,8 @@ def IMTB_AC_Zdq_MIMO(data_pos, data_neg, f, phi_f0, settings, calc_NET=False):
         ibeta2 = _get_beta(data_neg[0], data_neg[1], data_neg[2])
         valpha2 = _get_alpha(data_neg[3], data_neg[4], data_neg[5])
         vbeta2 = _get_beta(data_neg[3], data_neg[4], data_neg[5])
-    
+
+
     # V at pos scan - 1st inj
     Vd_inj1,Vq_inj1,phi_f0_cmp = get_Ydq_real_vector(f-f0, f0, phi_f0, fs, valpha1, vbeta1,calc_Vq = True)
     
@@ -1482,8 +1479,8 @@ def Single_IM_calc(rawfolder, sc_name, f_inj, settings, DQ_calc):
             
             
             # calculate MIMO models
-            print("Responses at the following frequency points will be calculated.")
-            print(f_inj[1:])
+            # print("Responses at the following frequency points will be calculated.")
+            # print(f_inj[1:])
             
             Zab_dut = []
             Zdq_dut = []
@@ -1687,8 +1684,8 @@ def Single_IM_calc(rawfolder, sc_name, f_inj, settings, DQ_calc):
                 Qss_net = np.imag(S_f0_net)
                 
             # calculate MIMO models
-            print("Responses at the following frequency points (dq frame) will be calculated.")
-            print(f_inj[1:])
+            # print("Responses at the following frequency points (dq frame) will be calculated.")
+            # print(f_inj[1:])
             
             Zab_dut = []
             Zdq_dut = []
@@ -1829,8 +1826,8 @@ def Single_IM_calc(rawfolder, sc_name, f_inj, settings, DQ_calc):
             
             
             # calculate MIMO models
-            print("Responses at the following frequency points will be calculated.")
-            print(f_inj[1:])
+            # print("Responses at the following frequency points will be calculated.")
+            # print(f_inj[1:])
             
             Zdc_dut = []
             if settings["Calculate NET"]:
