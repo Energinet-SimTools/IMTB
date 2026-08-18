@@ -6,6 +6,11 @@ Subscript of IMTB to execute a user GUI for settings creation
 
 Update history:
     21 Mar 2025 - v1.0 - first public version
+    21 Jul 2025 - v1.1 - update a typo in instructions 
+                         replace "PySimpleGUI" with "FreeSimpleGUI"
+    07 Apr 2026 - v1.3 - update default GUI setting 
+                         Plot harmonic and Plot network impedance as True    
+                         disable SISO sequence function due to bug
 
 """
 
@@ -25,8 +30,8 @@ INJ_FREQSTOP = 2000.0 # Default injection stop frequency (Hz)
 INJ_FREQSTEP = 25.0 # Default injection step frequency (Hz)
 
 # Settings for injection times for fixed and variable
-SETTLING_TIME = 0.2 # Default settling time (sec)
-INJECTION_TIME = 0.3 # Default injection time (sec)
+SETTLING_TIME = 2 # Default settling time (sec)
+INJECTION_TIME = 3 # Default injection time (sec)
 SETTLING_PERIODS = 3 # Default settling periods (int)
 INJECTION_PERIODS = 5 # Default injection periods (int)
 
@@ -44,7 +49,8 @@ import sys, os
 # for timestamp
 import time
 # for GUI
-import PySimpleGUI as sg
+# import PySimpleGUI as sg
+import FreeSimpleGUI as sg
 # for saving file to csv
 import csv
 # for looking at the XML tree of PSCAD workspace
@@ -235,7 +241,7 @@ def run(settings):
     inj_types_AC_SISO = [
                 "pos",
                 "neg",
-                "zero",
+                # "zero",
                 "a",
                 "b",
                 "c",
@@ -430,10 +436,10 @@ def run(settings):
          ],
         [
          sg.Checkbox("Plot impedances", default=True, key="-PLOTIMP-"),
-         sg.Checkbox("Plot harmonics", default=False, enable_events=False, key="-PLOTHARM-"),
+         sg.Checkbox("Plot harmonics", default=True, enable_events=False, key="-PLOTHARM-"),
          ],
         [
-         sg.Checkbox("Calculate NET", default=False, key="-CALCNET-"),
+         sg.Checkbox("Calculate NET", default=True, key="-CALCNET-"),
          sg.Checkbox("Clear RAW data", default=True, key="-CLEARRAW-"),
          ],
         ]
@@ -1015,7 +1021,7 @@ def run(settings):
                      icon=resource_path(ICON_FILENAME))
         
         if event == "-INFOINJTIME-":
-            sg.popup("Injection time is the time window after the settling time, which is taken for frequency-domain analysis. \n\nThe injection time has to be integral periods of existing frequency components to ensure the correct Discrete Fourier Transformation.The existing frequency components include system fundamental frequency (f1), perturbed frequency (fp), and the coupled response of the perturbed frequency if the perturbation is in sequence domain (f1-2fp) ",
+            sg.popup("Injection time is the time window after the settling time, which is taken for frequency-domain analysis. \n\nThe injection time has to be integral periods of existing frequency components to ensure the correct Discrete Fourier Transformation.The existing frequency components include system fundamental frequency (f1), perturbed frequency (fp), and the coupled response of the perturbed frequency if the perturbation is in sequence domain (fp-2f1) ",
                      title="INFO: Injection time",
                      icon=resource_path(ICON_FILENAME))
             

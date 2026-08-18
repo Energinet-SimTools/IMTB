@@ -6,7 +6,10 @@ Subscript of IMTB for impedance plotting
 
 Update history:
     21 Mar 2025 - v1.0 - first public version
-    
+    21 Jul 2025 - v1.1 - bug fix for ploting Net impedance with multiple scenario function
+    15 Oct 2025 - v1.2 - update Jacobian matrix calculation, including P-f scan
+    12 Mar 2026 - v1.3 - update Jacobian matrix calculation, including P-df/dt scan
+                       - add MIMO impedance passivity calculation
 """
 # =============================================================================
 # Global settings
@@ -20,9 +23,9 @@ Multi_plots = True # True means plotting individual scenatio data in individual 
 Neg_Z_region = True
 
 # Plot functions
-log_axis = False 
+log_axis = True 
 dB_unit = True
-unwrap_on = False
+unwrap_on = True
 
 # =============================================================================
 # Modules Imports
@@ -150,6 +153,56 @@ def get_IM_data(simPath, sc_name, settings):
             print("Get Jacobian matrix data from:")
             print(IM_csv_file)
             IM_file_name.append(IM_csvname.rsplit('.')[0])
+
+            # Kn2
+            
+            IM_csvnames = [
+                item for item in all_items if 'IM_Kn2_MIMO_' in item and sc_name in item and '.csv' in item]
+            if len(IM_csvnames) >0:
+                IM_csvname = IM_csvnames[0]
+            if 'IM_Kn2_MIMO_' in IM_csvname:
+                IM_csv_file = simPath + "\\" + IM_csvname
+                Z.append(IM.IM_read_CSV(IM_csv_file))
+                print("Get Jacobian matrix data from:")
+                print(IM_csv_file)
+                IM_file_name.append(IM_csvname.rsplit('.')[0])
+            
+            # Kn3
+            
+            IM_csvnames = [
+                item for item in all_items if 'IM_Kn3_MIMO_' in item and sc_name in item and '.csv' in item]
+            if len(IM_csvnames) >0:
+                IM_csvname = IM_csvnames[0]
+            if 'IM_Kn3_MIMO_' in IM_csvname:
+                IM_csv_file = simPath + "\\" + IM_csvname
+                Z.append(IM.IM_read_CSV(IM_csv_file))
+                print("Get Jacobian matrix data from:")
+                print(IM_csv_file)
+                IM_file_name.append(IM_csvname.rsplit('.')[0])
+            
+            # passivity
+
+            IM_csvnames = [
+                item for item in all_items if 'IM_Zab_passivity_' in item and sc_name in item and '.csv' in item]
+            if len(IM_csvnames) >0:
+                IM_csvname = IM_csvnames[0]
+            if 'IM_Zab_passivity_' in IM_csvname:
+                IM_csv_file = simPath + "\\" + IM_csvname
+                Z.append(IM.IM_read_CSV(IM_csv_file))
+                print("Get Zab passivity data from:")
+                print(IM_csv_file)
+                IM_file_name.append(IM_csvname.rsplit('.')[0])
+            
+            IM_csvnames = [
+                item for item in all_items if 'IM_Zdq_passivity_' in item and sc_name in item and '.csv' in item]
+            if len(IM_csvnames) >0:
+                IM_csvname = IM_csvnames[0]
+            if 'IM_Zdq_passivity_' in IM_csvname:
+                IM_csv_file = simPath + "\\" + IM_csvname
+                Z.append(IM.IM_read_CSV(IM_csv_file))
+                print("Get Zdq passivity data from:")
+                print(IM_csv_file)
+                IM_file_name.append(IM_csvname.rsplit('.')[0])
             
             
             IM_folder = simPath
@@ -182,7 +235,54 @@ def get_IM_data(simPath, sc_name, settings):
             print("Get Jacobian matrix data from:")
             print(IM_csv_file)
             IM_file_name.append(IM_csvname.rsplit('.')[0])
+
+            # Kn2
+            IM_csvnames = [
+                item for item in all_items if 'IM_Kn2_MIMO_' in item and sc_name in item and '.csv' in item]
+            if len(IM_csvnames) >0:
+                IM_csvname = IM_csvnames[0]
+            if 'IM_Kn2_MIMO_' in IM_csvname:
+                IM_csv_file = simPath + "\\" + IM_csvname
+                Z.append(IM.IM_read_CSV(IM_csv_file))
+                print("Get Jacobian matrix data from:")
+                print(IM_csv_file)
+                IM_file_name.append(IM_csvname.rsplit('.')[0])
             
+            # Kn3
+            IM_csvnames = [
+                item for item in all_items if 'IM_Kn3_MIMO_' in item and sc_name in item and '.csv' in item]
+            if len(IM_csvnames) >0:
+                IM_csvname = IM_csvnames[0]
+            if 'IM_Kn3_MIMO_' in IM_csvname:
+                IM_csv_file = simPath + "\\" + IM_csvname
+                Z.append(IM.IM_read_CSV(IM_csv_file))
+                print("Get Jacobian matrix data from:")
+                print(IM_csv_file)
+                IM_file_name.append(IM_csvname.rsplit('.')[0])
+            
+            # passivity
+
+            IM_csvnames = [
+                item for item in all_items if 'IM_Zab_passivity_' in item and sc_name in item and '.csv' in item]
+            if len(IM_csvnames) >0:
+                IM_csvname = IM_csvnames[0]
+            if 'IM_Zab_passivity_' in IM_csvname:
+                IM_csv_file = simPath + "\\" + IM_csvname
+                Z.append(IM.IM_read_CSV(IM_csv_file))
+                print("Get Zab passivity data from:")
+                print(IM_csv_file)
+                IM_file_name.append(IM_csvname.rsplit('.')[0])
+            
+            IM_csvnames = [
+                item for item in all_items if 'IM_Zdq_passivity_' in item and sc_name in item and '.csv' in item]
+            if len(IM_csvnames) >0:
+                IM_csvname = IM_csvnames[0]
+            if 'IM_Zdq_passivity_' in IM_csvname:
+                IM_csv_file = simPath + "\\" + IM_csvname
+                Z.append(IM.IM_read_CSV(IM_csv_file))
+                print("Get Zdq passivity data from:")
+                print(IM_csv_file)
+                IM_file_name.append(IM_csvname.rsplit('.')[0])
             
             IM_folder = simPath
             
@@ -192,10 +292,25 @@ def get_IM_data(simPath, sc_name, settings):
                 item for item in all_items if 'IM_Zdc_MIMO_' in item and sc_name in item and '.csv' in item]
             IM_csvname = IM_csvnames[0]
             IM_csv_file = simPath + "\\" + IM_csvname
+            print(IM_csv_file)
             Z.append(IM.IM_read_CSV(IM_csv_file))
-            print("Get DC MIMO impedance data from:")
+            print("Get DC MIMO  impedance data from:")
             print(IM_csv_file)
             IM_file_name.append(IM_csvname.rsplit('.')[0])
+
+            # passivity
+
+            IM_csvnames = [
+                item for item in all_items if 'IM_Zdc_passivity_' in item and sc_name in item and '.csv' in item]
+            if len(IM_csvnames) >0:
+                IM_csvname = IM_csvnames[0]
+            if 'IM_Zdc_passivity_' in IM_csvname:
+                IM_csv_file = simPath + "\\" + IM_csvname
+                Z.append(IM.IM_read_CSV(IM_csv_file))
+                print("Get Zdc passivity data from:")
+                print(IM_csv_file)
+                IM_file_name.append(IM_csvname.rsplit('.')[0])
+            
             
             IM_folder = simPath
         
@@ -275,7 +390,47 @@ def get_Bode_plot_html(Z, figurePath, pName, DUT_plot=True, NET_plot=True, log_a
     print('Impedance figure saved as:')
     print(figurePath + "\\" + pName + ".html")
     
+def get_passivity_plot_html(Z, figurePath, pName, DUT_plot=True, NET_plot=True, log_axis=True, dB_unit=True,unwrap_on=True):
 
+    fig = make_subplots(rows=1, cols=1,
+                        shared_xaxes=True,
+                        vertical_spacing=0.02)
+
+    colors = create_colormap(nfig=2)
+    
+    
+    if DUT_plot:
+              
+        fig.append_trace(go.Scatter(x=Z['Pidxdut'].f, y=Z['Pidxdut'].values, 
+                                        name='Pidxdut_mag', line_color=colors[0], mode='lines'), row=1, col=1, )
+        
+
+    if NET_plot and "Pidxnet" in Z.keys():
+
+        fig.append_trace(go.Scatter(x=Z['Pidxnet'].f, y=Z['Pidxnet'].values, 
+                                        name='Pidxnet_mag', line_color=colors[1], mode='lines'), row=1, col=1, )
+   
+    f_low = Z['Pidxdut'].f[0]
+    f_high = Z['Pidxdut'].f[len(Z['Pidxdut'].f)-1]
+    if f_low<0:
+        adjust_freq_range_SISO(fig, f_low=min(np.abs(Z['Pidxdut'].f)), f_high=f_high)
+    else:
+        adjust_freq_range_SISO(fig, f_low=f_low, f_high=f_high)
+    
+    if log_axis:
+        fig.update_xaxes(type="log", row=1, col=1)
+
+    fig.update_xaxes(title_text="Frequency (Hz)", row=2, col=1)
+
+    fig.update_yaxes(title_text="Amplitude", row=1, col=1)
+        
+
+    fig.update_layout(title='Impedance passivity plot')
+    
+    fig.write_html(figurePath + "\\" + pName + ".html")
+    print('Impedance passivity figure saved as:')
+    print(figurePath + "\\" + pName + ".html")
+ 
 def add_Bode_plot_html(fig, color, legend_name, Z, log_axis=True, dB_unit=True, unwrap_on=True, NET_plot=False):
     if dB_unit:
         fig.append_trace(go.Scatter(x=Z['Zdut'].f, y=IM.Mat_mag(
@@ -324,7 +479,26 @@ def add_Bode_plot_html(fig, color, legend_name, Z, log_axis=True, dB_unit=True, 
     fig.update_layout(title='Impedance Bode plot')
     return fig
     
+def add_passivity_plot_html(fig, color, legend_name, Z, log_axis=True, dB_unit=True, unwrap_on=True, NET_plot=False):
+               
+    fig.append_trace(go.Scatter(x=Z['Pidxdut'].f, y=Z['Pidxdut'].values, 
+                                    name=legend_name+'Pidxdut_mag', line_color=color, mode='lines'), row=1, col=1, )
+        
+    if NET_plot and "Pidxnet" in Z.keys():
+               
+        fig.append_trace(go.Scatter(x=Z['Pidxnet'].f, y=Z['Pidxnet'].values, 
+                                        name=legend_name+'Pidxnet_mag', line_color=color, mode='lines'), row=1, col=1, )
 
+    if log_axis:
+        fig.update_xaxes(type="log", row=1, col=1)
+
+    fig.update_xaxes(title_text="Frequency (Hz)", row=2, col=1)
+
+    fig.update_yaxes(title_text="Amplitude", row=1, col=1)
+        
+    fig.update_layout(title='Impedance passivity plot')
+    return fig
+    
 def get_Z_MIMO_Bode_plot_html(Z, figurePath, pName, DUT_plot=True, NET_plot=True, log_axis=True, dB_unit=True, unwrap_on=True):
 
     fig = make_subplots(rows=4, cols=2,
@@ -442,7 +616,7 @@ def get_Z_MIMO_Bode_plot_html(Z, figurePath, pName, DUT_plot=True, NET_plot=True
     f_low = Z['Zdut'].f[0]
     f_high = Z['Zdut'].f[len(Z['Zdut'].f)-1]
     if f_low<0:
-        adjust_freq_range_MIMO(fig, f_low=0, f_high=f_high)
+        adjust_freq_range_MIMO(fig, f_low=min(np.abs(Z['Zdut'].f)), f_high=f_high)
     else:
         adjust_freq_range_MIMO(fig, f_low=f_low, f_high=f_high)
     
@@ -656,9 +830,9 @@ def get_K_MIMO_Bode_plot_html(Z, figurePath, pName, DUT_plot=True, NET_plot=True
         fig.update_yaxes(title_text="Amplitude (dB)", row=1, col=1)
         fig.update_yaxes(title_text="Amplitude (dB)", row=3, col=1)
     else:
-        fig.update_yaxes(title_text="Amplitude (MW/rad)", row=1, col=1)        
+        fig.update_yaxes(title_text="Amplitude (MW/rad or MW/Hz or MW/(Hz/s))", row=1, col=1)        
         fig.update_yaxes(title_text="Amplitude (MW/kV)", row=1, col=2)        
-        fig.update_yaxes(title_text="Amplitude (MVAR/rad)", row=3, col=1)
+        fig.update_yaxes(title_text="Amplitude (MVAR/rad or MVAR/Hz or or MVAR/(Hz/s))", row=3, col=1)
         fig.update_yaxes(title_text="Amplitude (MVAR/kV)", row=3, col=2)
         fig.update_yaxes(title_text="Phase (deg)", row=2, col=2)
         fig.update_yaxes(title_text="Phase (deg)", row=4, col=2)
@@ -674,7 +848,7 @@ def get_K_MIMO_Bode_plot_html(Z, figurePath, pName, DUT_plot=True, NET_plot=True
     f_low = Z['Kdut'].f[0]
     f_high = Z['Kdut'].f[len(Z['Kdut'].f)-1]
     if f_low<0:
-        adjust_freq_range_MIMO(fig, f_low=0, f_high=f_high)
+        adjust_freq_range_MIMO(fig, f_low=min(np.abs(Z['Kdut'].f)), f_high=f_high)
     else:
         adjust_freq_range_MIMO(fig, f_low=f_low, f_high=f_high)
     fig.write_html(figurePath + "\\" + pName + ".html")
@@ -822,6 +996,42 @@ def Single_SC_plot(settings,simPath,sc_name, DUT_plot=True, NET_plot=True, log_a
         Z, IM_folder, IM_file_name = get_IM_data(simPath,sc_name,settings)
         print('-------------------------------')
 
+        # Check if Kn2 exists - if not create Kn2, Kn3
+        if len(Z) < 4:
+            for IM_file in IM_file_name:
+                if "IM_Kn_MIMO" in IM_file:
+                    print('Creating data for Kn2...')
+                    print('-------------------------------')
+                    Kn2,IM_file_Kn2,Kn3,IM_file_Kn3 = create_Kn2Kn3(settings,Z[2],IM_file)
+                    Z.append(Kn2)
+                    IM_file_name.append(IM_file_Kn2)
+                    Z.append(Kn3)
+                    IM_file_name.append(IM_file_Kn3)
+                    print('-------------------------------')
+                if "IM_Zab_MIMO" in IM_file:
+                    print('Creating passivity data for Zab, Zdq...')
+                    print('-------------------------------')
+                    Pidx_Zab,IM_file_Pidx_Zab, Pidx_Zdq,IM_file_Pidx_Zdq = create_passivity_AC(settings,Z[0],Z[1],IM_file)
+                    Z.append(Pidx_Zab)
+                    IM_file_name.append(IM_file_Pidx_Zab)
+                    Z.append(Pidx_Zdq)
+                    IM_file_name.append(IM_file_Pidx_Zdq)
+                    print('-------------------------------')
+                if "IM_Zdc_MIMO" in IM_file:
+                    print('Creating passivity data for Zdc...')
+                    print('-------------------------------')
+                    Pidx_Zdc,IM_file_Pidx_Zdc = create_passivity_DC(settings,Z[0],IM_file)
+                    Z.append(Pidx_Zdc)
+                    IM_file_name.append(IM_file_Pidx_Zdc)
+                    print('-------------------------------')
+            
+            # Get impedance data and folder
+            print('Reading data...')
+            print('-------------------------------')
+            Z, IM_folder, IM_file_name = get_IM_data(simPath,sc_name,settings)
+            print('-------------------------------')
+                    
+
         # Get Bode plot and saved in html
         print('Plotting data...')
         print('-------------------------------')
@@ -832,8 +1042,263 @@ def Single_SC_plot(settings,simPath,sc_name, DUT_plot=True, NET_plot=True, log_a
                                 DUT_plot=DUT_plot, NET_plot=NET_plot, log_axis=False, dB_unit=dB_unit, unwrap_on=unwrap_on)
             get_K_MIMO_Bode_plot_html(Z[2], figurePath=IM_folder, pName=IM_file_name[2],
                                 DUT_plot=DUT_plot, NET_plot=NET_plot, log_axis=False, dB_unit=dB_unit, unwrap_on=unwrap_on)
+            get_K_MIMO_Bode_plot_html(Z[3], figurePath=IM_folder, pName=IM_file_name[3],
+                                DUT_plot=DUT_plot, NET_plot=NET_plot, log_axis=False, dB_unit=dB_unit, unwrap_on=unwrap_on)
+            get_K_MIMO_Bode_plot_html(Z[4], figurePath=IM_folder, pName=IM_file_name[4],
+                                DUT_plot=DUT_plot, NET_plot=NET_plot, log_axis=False, dB_unit=dB_unit, unwrap_on=unwrap_on)
+            get_passivity_plot_html(Z[5],figurePath=IM_folder, pName=IM_file_name[5],
+                            DUT_plot=DUT_plot, NET_plot=NET_plot, log_axis=False, dB_unit=False, unwrap_on=unwrap_on)
+            get_passivity_plot_html(Z[6],figurePath=IM_folder, pName=IM_file_name[6],
+                            DUT_plot=DUT_plot, NET_plot=NET_plot, log_axis=False, dB_unit=False, unwrap_on=unwrap_on)
+        elif settings["Terminal type"] == "DC":
+            get_passivity_plot_html(Z[1],figurePath=IM_folder, pName=IM_file_name[1],
+                            DUT_plot=DUT_plot, NET_plot=NET_plot, log_axis=False, dB_unit=False, unwrap_on=unwrap_on)
+
+        
         print('-------------------------------')
 
+def create_Kn2Kn3(settings,Kn,IM_file):
+    
+    Kn2_dut_TF,Kn3_dut_TF = IM.P2P(Kn['Kdut'])
+    if settings["Calculate NET"]: 
+        Kn2_net_TF,Kn3_net_TF = IM.P2P(Kn['Knet'])
+    
+    IM_file_Kn2 = IM_file.replace('IM_Kn_MIMO','IM_Kn2_MIMO')
+    IM_file_Kn3 = IM_file.replace('IM_Kn_MIMO','IM_Kn3_MIMO')
+
+    # # data preparation for saving Kn2
+    Z11 = []
+    Z12 = []
+    Z21 = []
+    Z22 = []
+    for Zk in Kn2_dut_TF.values:
+        Z11.append(Zk[0][0])
+        Z12.append(Zk[0][1])
+        Z21.append(Zk[1][0])
+        Z22.append(Zk[1][1])
+    
+    if settings["Calculate NET"]: 
+        # data preparation for saving Kn
+        Z11_net = []
+        Z12_net = []
+        Z21_net = []
+        Z22_net = []
+        for Zk in Kn2_net_TF.values:
+            Z11_net.append(Zk[0][0])
+            Z12_net.append(Zk[0][1])
+            Z21_net.append(Zk[1][0])
+            Z22_net.append(Zk[1][1])
+                 
+            
+    # save to IM CSV file
+    IM_csvname = IM_file_Kn2 + ".csv"
+    IM_csv_file = (settings["Working folder"] + "\\IMTB_data\\" + 
+                settings["Timestamp"] + "_" + settings["simname"] + "\\" +
+                IM_csvname )
+            
+    if settings["Calculate NET"]: 
+        IM_str = ['f','Kdut_11','Kdut_12','Kdut_21','Kdut_22','Knet_11','Knet_12','Knet_21','Knet_22']
+        IM_list = [Kn2_dut_TF.f,Z11,Z12,Z21,Z22,Z11_net,Z12_net,Z21_net,Z22_net]
+    else:
+        IM_str = ['f','Kdut_11','Kdut_12','Kdut_21','Kdut_22']
+        IM_list = [Kn2_dut_TF.f,Z11,Z12,Z21,Z22]    
+            
+    
+    IM_data_Kn2 = IM.IMTB_AC_immittace_toCSV(IM_csv_file, IM_str, IM_list)
+    print('Jacobian matrix data (P-f relationship) has been saved in:')
+    print(IM_csv_file)
+
+    # # data preparation for saving Kn3
+    Z11 = []
+    Z12 = []
+    Z21 = []
+    Z22 = []
+    for Zk in Kn3_dut_TF.values:
+        Z11.append(Zk[0][0])
+        Z12.append(Zk[0][1])
+        Z21.append(Zk[1][0])
+        Z22.append(Zk[1][1])
+    
+    if settings["Calculate NET"]: 
+        # data preparation for saving Kn
+        Z11_net = []
+        Z12_net = []
+        Z21_net = []
+        Z22_net = []
+        for Zk in Kn3_net_TF.values:
+            Z11_net.append(Zk[0][0])
+            Z12_net.append(Zk[0][1])
+            Z21_net.append(Zk[1][0])
+            Z22_net.append(Zk[1][1])
+                 
+            
+    # save to IM CSV file
+    IM_csvname = IM_file_Kn3 + ".csv"
+    IM_csv_file = (settings["Working folder"] + "\\IMTB_data\\" + 
+                settings["Timestamp"] + "_" + settings["simname"] + "\\" +
+                IM_csvname )
+            
+    if settings["Calculate NET"]: 
+        IM_str = ['f','Kdut_11','Kdut_12','Kdut_21','Kdut_22','Knet_11','Knet_12','Knet_21','Knet_22']
+        IM_list = [Kn3_dut_TF.f,Z11,Z12,Z21,Z22,Z11_net,Z12_net,Z21_net,Z22_net]
+    else:
+        IM_str = ['f','Kdut_11','Kdut_12','Kdut_21','Kdut_22']
+        IM_list = [Kn3_dut_TF.f,Z11,Z12,Z21,Z22]    
+            
+    
+    IM_data_Kn3 = IM.IMTB_AC_immittace_toCSV(IM_csv_file, IM_str, IM_list)
+    print('Jacobian matrix data (P-df/dt relationship) has been saved in:')
+    print(IM_csv_file)
+
+    Kn2 = {}
+    Kn2['Kdut'] = Kn2_dut_TF
+    if settings["Calculate NET"]: 
+        Kn2['Knet'] = Kn2_net_TF
+    
+    Kn3 = {}
+    Kn3['Kdut'] = Kn3_dut_TF
+    if settings["Calculate NET"]: 
+        Kn3['Knet'] = Kn3_net_TF
+
+    return Kn2,IM_file_Kn2, Kn3,IM_file_Kn3
+
+                    
+def create_passivity_AC(settings,Zab,Zdq,IM_file_Zab):
+    
+    Pidx_Zab_dut_TF = IM.Passvity_ZMIMO(Zab['Zdut'])
+    Pidx_Zdq_dut_TF = IM.Passvity_ZMIMO(Zdq['Zdut'])
+
+    if settings["Calculate NET"]: 
+        Pidx_Zab_net_TF = IM.Passvity_ZMIMO(Zab['Znet'])
+        Pidx_Zdq_net_TF = IM.Passvity_ZMIMO(Zdq['Znet'])
+    
+    IM_file_Pidx_Zab = IM_file_Zab.replace('IM_Zab_MIMO','IM_Zab_passivity')
+    IM_file_Pidx_Zdq = IM_file_Zab.replace('IM_Zab_MIMO','IM_Zdq_passivity')
+
+    # # data preparation for saving Passivity index - Zab
+    Pidx = []
+
+    for Pk in Pidx_Zab_dut_TF.values:
+        Pidx.append(Pk)
+            
+    if settings["Calculate NET"]: 
+        # data preparation for saving passivity index - Zab
+        Pidx_net = []
+
+        for Pk in Pidx_Zab_net_TF.values:
+            Pidx_net.append(Pk)
+                 
+            
+    # save to IM CSV file
+    IM_csvname = IM_file_Pidx_Zab  + ".csv"
+    IM_csv_file = (settings["Working folder"] + "\\IMTB_data\\" + 
+                        settings["Timestamp"] + "_" + settings["simname"] + "\\" +
+                        IM_csvname)
+            
+    if settings["Calculate NET"]: 
+        IM_str = ['f','Pidxdut','Pidxnet']
+        IM_list = [Pidx_Zab_dut_TF.f,Pidx,Pidx_net]
+    else:
+        IM_str = ['f','Pidxdut']
+        IM_list = [Pidx_Zab_dut_TF.f,Pidx]   
+            
+    
+    IM_data_Pidx_Zab = IM.IMTB_AC_immittace_toCSV(IM_csv_file, IM_str, IM_list)
+    print('Impedance passivity index for Zab has been saved in:')
+    print(IM_csv_file) 
+
+    # # data preparation for saving Passivity index - Zdq
+    Pidx = []
+
+    for Pk in Pidx_Zdq_dut_TF.values:
+        Pidx.append(Pk)
+       
+    if settings["Calculate NET"]: 
+        # data preparation for saving passivity index - Zdq
+        Pidx_net = []
+
+        for Pk in Pidx_Zdq_net_TF.values:
+            Pidx_net.append(Pk)
+                 
+            
+    # save to IM CSV file
+    IM_csvname = IM_file_Pidx_Zdq  + ".csv"
+    IM_csv_file = (settings["Working folder"] + "\\IMTB_data\\" + 
+                        settings["Timestamp"] + "_" + settings["simname"] + "\\" +
+                        IM_csvname)
+            
+    if settings["Calculate NET"]: 
+        IM_str = ['f','Pidxdut','Pidxnet']
+        IM_list = [Pidx_Zdq_dut_TF.f,Pidx,Pidx_net]
+    else:
+        IM_str = ['f','Pidxdut']
+        IM_list = [Pidx_Zdq_dut_TF.f,Pidx]   
+            
+    
+    IM_data_Pidx_Zdq = IM.IMTB_AC_immittace_toCSV(IM_csv_file, IM_str, IM_list)
+    print('Impedance passivity index for Zdq has been saved in:')
+    print(IM_csv_file) 
+
+    Pidx_Zab = {}
+    Pidx_Zab['Pidxdut'] = Pidx_Zab_dut_TF
+    if settings["Calculate NET"]: 
+        Pidx_Zab['Pidxnet'] = Pidx_Zab_net_TF
+    
+    Pidx_Zdq = {}
+    Pidx_Zdq['Pidxdut'] = Pidx_Zdq_dut_TF
+    if settings["Calculate NET"]: 
+        Pidx_Zdq['Pidxnet'] = Pidx_Zdq_net_TF
+
+    return Pidx_Zab,IM_file_Pidx_Zab, Pidx_Zdq,IM_file_Pidx_Zdq
+
+def create_passivity_DC(settings,Zdc,IM_file_Zdc):
+    
+    Pidx_Zdc_dut_TF = IM.Passvity_ZMIMO(Zdc['Zdut'])
+
+    if settings["Calculate NET"]: 
+        Pidx_Zdc_net_TF = IM.Passvity_ZMIMO(Zdc['Znet'])
+    
+    IM_file_Pidx_Zdc = IM_file_Zdc.replace('IM_Zdc_MIMO','IM_Zdc_passivity')
+
+    # # data preparation for saving Passivity index - Zdc
+    Pidx = []
+
+    for Pk in Pidx_Zdc_dut_TF.values:
+        Pidx.append(Pk)
+            
+    if settings["Calculate NET"]: 
+        # data preparation for saving passivity index - Zdc
+        Pidx_net = []
+
+        for Pk in Pidx_Zdc_net_TF.values:
+            Pidx_net.append(Pk)
+                 
+            
+    # save to IM CSV file
+    IM_csvname = IM_file_Pidx_Zdc  + ".csv"
+    IM_csv_file = (settings["Working folder"] + "\\IMTB_data\\" + 
+                        settings["Timestamp"] + "_" + settings["simname"] + "\\" +
+                        IM_csvname)
+            
+    if settings["Calculate NET"]: 
+        IM_str = ['f','Pidxdut','Pidxnet']
+        IM_list = [Pidx_Zdc_dut_TF.f,Pidx,Pidx_net]
+    else:
+        IM_str = ['f','Pidxdut']
+        IM_list = [Pidx_Zdc_dut_TF.f,Pidx]   
+            
+    
+    IM_data_Pidx_Zdc = IM.IMTB_AC_immittace_toCSV(IM_csv_file, IM_str, IM_list)
+    print('Impedance passivity index for Zdc has been saved in:')
+    print(IM_csv_file) 
+
+
+    Pidx_Zdc = {}
+    Pidx_Zdc['Pidxdut'] = Pidx_Zdc_dut_TF
+    if settings["Calculate NET"]: 
+        Pidx_Zdc['Pidxnet'] = Pidx_Zdc_net_TF
+    
+    return Pidx_Zdc,IM_file_Pidx_Zdc
 
 def Multi_SC_plot(settings, simPath, DUT_plot=True, NET_plot=True, log_axis=True, dB_unit=True, unwrap_on=True):
     
@@ -908,7 +1373,21 @@ def Multi_SC_plot(settings, simPath, DUT_plot=True, NET_plot=True, log_axis=True
         fig3 = make_subplots(rows=4, cols=2,
                             shared_xaxes=True,
                             vertical_spacing=0.02)
+        fig4 = make_subplots(rows=4, cols=2,
+                            shared_xaxes=True,
+                            vertical_spacing=0.02)
         
+        fig5 = make_subplots(rows=4, cols=2,
+                            shared_xaxes=True,
+                            vertical_spacing=0.02)
+        
+        # passivity
+        fig6 = make_subplots(rows=1, cols=1,
+                            shared_xaxes=True,
+                            vertical_spacing=0.02)
+        fig7 = make_subplots(rows=1, cols=1,
+                            shared_xaxes=True,
+                            vertical_spacing=0.02)
         
         
         for idx_sc in range(int(settings["Nr scenarios"])):
@@ -923,6 +1402,42 @@ def Multi_SC_plot(settings, simPath, DUT_plot=True, NET_plot=True, log_axis=True
             print('-------------------------------')
             Z, IM_folder, IM_file_name = get_IM_data(simPath,sc_name,settings)
             print('-------------------------------')
+
+            # Check if Kn2 exists - if not create Kn2
+
+            if len(Z) < 4:
+                for IM_file in IM_file_name:
+                    if "IM_Kn_MIMO" in IM_file and sc_name in IM_file:
+                        print('Creating data for Kn2...')
+                        print('-------------------------------')
+                        Kn2,IM_file_Kn2,Kn3,IM_file_Kn3 = create_Kn2Kn3(settings,Z[2],IM_file)
+                        Z.append(Kn2)
+                        IM_file_name.append(IM_file_Kn2)
+                        Z.append(Kn3)
+                        IM_file_name.append(IM_file_Kn3)
+                        print('-------------------------------')
+                    if "IM_Zab_MIMO" in IM_file:
+                        print('Creating passivity data for Zab, Zdq...')
+                        print('-------------------------------')
+                        Pidx_Zab,IM_file_Pidx_Zab, Pidx_Zdq,IM_file_Pidx_Zdq = create_passivity_AC(settings,Z[0],Z[1],IM_file)
+                        Z.append(Pidx_Zab)
+                        IM_file_name.append(IM_file_Pidx_Zab)
+                        Z.append(Pidx_Zdq)
+                        IM_file_name.append(IM_file_Pidx_Zdq)
+                        print('-------------------------------')
+                    if "IM_Zdc_MIMO" in IM_file:
+                        print('Creating passivity data for Zdc...')
+                        print('-------------------------------')
+                        Pidx_Zdc,IM_file_Pidx_Zdc = create_passivity_DC(settings,Z[0],IM_file)
+                        Z.append(Pidx_Zdc)
+                        IM_file_name.append(IM_file_Pidx_Zdc)
+                        print('-------------------------------')
+                
+                # Get impedance data and folder
+                print('-------------------------------')
+                Z, IM_folder, IM_file_name = get_IM_data(simPath,sc_name,settings)
+                print('-------------------------------')
+
             
             if idx_sc==0 and Neg_Z_region:
                 f_low = Z[0]['Zdut'].f[0]
@@ -938,20 +1453,22 @@ def Multi_SC_plot(settings, simPath, DUT_plot=True, NET_plot=True, log_axis=True
                     add_filled_area_on_phase_plot(fig1,4,1,f_low,f_high,phase_band_no=1)
                     add_filled_area_on_phase_plot(fig1,4,2,f_low,f_high,phase_band_no=1)
                 
-                
-                f_low = Z[1]['Zdut'].f[0]
-                f_high = Z[1]['Zdut'].f[len(Z[1]['Zdut'].f)-1]
-                if unwrap_on:
-                    add_filled_area_on_phase_plot(fig2,2,1,f_low,f_high,phase_band_no=2)
-                    add_filled_area_on_phase_plot(fig2,2,2,f_low,f_high,phase_band_no=2)
-                    add_filled_area_on_phase_plot(fig2,4,1,f_low,f_high,phase_band_no=2)
-                    add_filled_area_on_phase_plot(fig2,4,2,f_low,f_high,phase_band_no=2)
-                else:
-                    add_filled_area_on_phase_plot(fig2,2,1,f_low,f_high,phase_band_no=1)
-                    add_filled_area_on_phase_plot(fig2,2,2,f_low,f_high,phase_band_no=1)
-                    add_filled_area_on_phase_plot(fig2,4,1,f_low,f_high,phase_band_no=1)
-                    add_filled_area_on_phase_plot(fig2,4,2,f_low,f_high,phase_band_no=1)
-                
+                # if settings("Terminal type")=="AC":
+                if len(Z)>1 and settings["Terminal type"]=="AC":
+                    f_low = Z[1]['Zdut'].f[0]
+                    f_high = Z[1]['Zdut'].f[len(Z[1]['Zdut'].f)-1]
+                    if unwrap_on:
+                        add_filled_area_on_phase_plot(fig2,2,1,f_low,f_high,phase_band_no=2)
+                        add_filled_area_on_phase_plot(fig2,2,2,f_low,f_high,phase_band_no=2)
+                        add_filled_area_on_phase_plot(fig2,4,1,f_low,f_high,phase_band_no=2)
+                        add_filled_area_on_phase_plot(fig2,4,2,f_low,f_high,phase_band_no=2)
+                    else:
+                        add_filled_area_on_phase_plot(fig2,2,1,f_low,f_high,phase_band_no=1)
+                        add_filled_area_on_phase_plot(fig2,2,2,f_low,f_high,phase_band_no=1)
+                        add_filled_area_on_phase_plot(fig2,4,1,f_low,f_high,phase_band_no=1)
+                        add_filled_area_on_phase_plot(fig2,4,2,f_low,f_high,phase_band_no=1)
+
+                                
             
            
             add_Z_MIMO_Bode_plot_html(fig1, colors[idx_sc], sc_name, Z[0], 
@@ -960,25 +1477,55 @@ def Multi_SC_plot(settings, simPath, DUT_plot=True, NET_plot=True, log_axis=True
             f_high = Z[0]['Zdut'].f[len(Z[0]['Zdut'].f)-1]
             adjust_freq_range_MIMO(fig1, f_low=f_low, f_high=f_high)
             
-            f_low = Z[1]['Zdut'].f[0]
-            f_high = Z[0]['Zdut'].f[len(Z[0]['Zdut'].f)-1]
-            add_Z_MIMO_Bode_plot_html(fig2, colors[idx_sc], sc_name, Z[1], 
-                                log_axis=False, dB_unit=dB_unit, unwrap_on=unwrap_on, NET_plot=NET_plot)
-            if f_low < 0:
-                adjust_freq_range_MIMO(fig2, f_low=0, f_high=f_high)
-            else:
-                adjust_freq_range_MIMO(fig2, f_low=f_low, f_high=f_high)
-            
-            add_K_MIMO_Bode_plot_html(fig3, colors[idx_sc], sc_name, Z[2], 
-                                 log_axis=False, dB_unit=dB_unit, unwrap_on=unwrap_on, NET_plot=NET_plot)
-            if f_low < 0:
-                adjust_freq_range_MIMO(fig3, f_low=0, f_high=f_high)
-            else:
-                adjust_freq_range_MIMO(fig3, f_low=f_low, f_high=f_high)
+            if settings["Terminal type"]=="AC":
+                if len(Z)>1:
+                    f_low = Z[1]['Zdut'].f[0]
+                    f_high = Z[0]['Zdut'].f[len(Z[0]['Zdut'].f)-1]
+                    add_Z_MIMO_Bode_plot_html(fig2, colors[idx_sc], sc_name, Z[1], 
+                                    log_axis=False, dB_unit=dB_unit, unwrap_on=unwrap_on, NET_plot=NET_plot)
                 
+                    if f_low < 0:
+                        adjust_freq_range_MIMO(fig2, f_low=min(np.abs(Z[1]['Zdut'].f)), f_high=f_high)
+                    else:
+                        adjust_freq_range_MIMO(fig2, f_low=f_low, f_high=f_high)
+                
+                    add_K_MIMO_Bode_plot_html(fig3, colors[idx_sc], sc_name, Z[2], 
+                                     log_axis=False, dB_unit=dB_unit, unwrap_on=unwrap_on, NET_plot=NET_plot)
+                    if f_low < 0:
+                        adjust_freq_range_MIMO(fig3, f_low=min(np.abs(Z[2]['Kdut'].f)), f_high=f_high)
+                    else:
+                        adjust_freq_range_MIMO(fig3, f_low=f_low, f_high=f_high)
+                
+
+                if len(Z)>3:
+                    add_K_MIMO_Bode_plot_html(fig4, colors[idx_sc], sc_name, Z[3], 
+                                     log_axis=False, dB_unit=dB_unit, unwrap_on=unwrap_on, NET_plot=NET_plot)
+                    if f_low < 0:
+                        adjust_freq_range_MIMO(fig4, f_low=min(np.abs(Z[3]['Kdut'].f)), f_high=f_high)
+                    else:
+                        adjust_freq_range_MIMO(fig4, f_low=f_low, f_high=f_high)
+                    
+                    add_K_MIMO_Bode_plot_html(fig5, colors[idx_sc], sc_name, Z[4], 
+                                     log_axis=False, dB_unit=dB_unit, unwrap_on=unwrap_on, NET_plot=NET_plot)
+                    if f_low < 0:
+                        adjust_freq_range_MIMO(fig5, f_low=min(np.abs(Z[4]['Kdut'].f)), f_high=f_high)
+                    else:
+                        adjust_freq_range_MIMO(fig5, f_low=f_low, f_high=f_high)
+                    
+                    if len(Z)>5:
+                        
+                        add_passivity_plot_html(fig6, colors[idx_sc], sc_name, Z[5], 
+                                     log_axis=False, dB_unit=False, unwrap_on=unwrap_on, NET_plot=NET_plot)
+
+                        add_passivity_plot_html(fig7, colors[idx_sc], sc_name, Z[6], 
+                                     log_axis=False, dB_unit=False, unwrap_on=unwrap_on, NET_plot=NET_plot)
+            elif settings["Terminal type"]=="DC":
+                add_passivity_plot_html(fig6, colors[idx_sc], sc_name, Z[1], 
+                                     log_axis=False, dB_unit=False, unwrap_on=unwrap_on, NET_plot=NET_plot)
+
+
             print('Saving plot...')
             print('-------------------------------')
-            print(dB_unit)
 
             figurePath=IM_folder
             pName=IM_file_name[0].split('sc')[0]+"allSC"
@@ -986,16 +1533,56 @@ def Multi_SC_plot(settings, simPath, DUT_plot=True, NET_plot=True, log_axis=True
             print('Impedance figure saved as:')
             print(figurePath + "\\" + pName + ".html")
             
-            pName=IM_file_name[1].split('sc')[0]+"allSC"
-            fig2.write_html(figurePath + "\\" + pName + ".html")
-            print('Impedance figure saved as:')
-            print(figurePath + "\\" + pName + ".html")
-            
-            pName=IM_file_name[2].split('sc')[0]+"allSC"
-            fig3.write_html(figurePath + "\\" + pName + ".html")
-            print('Jacobian matrix figure saved as:')
-            print(figurePath + "\\" + pName + ".html")
-            print('-------------------------------')
+            if settings["Terminal type"]=="AC":
+                if len(Z)>1:
+                    pName=IM_file_name[1].split('sc')[0]+"allSC"
+                    fig2.write_html(figurePath + "\\" + pName + ".html")
+                    print('Impedance figure saved as:')
+                    print(figurePath + "\\" + pName + ".html")
+                
+                    pName=IM_file_name[2].split('sc')[0]+"allSC"
+                    fig3.write_html(figurePath + "\\" + pName + ".html")
+                    print('Jacobian matrix figure saved as:')
+                    print(figurePath + "\\" + pName + ".html")
+                    print('-------------------------------')
+
+                if len(Z)>3:
+                    pName=IM_file_name[3].split('sc')[0]+"allSC"
+                    fig4.write_html(figurePath + "\\" + pName + ".html")
+                    print('Jacobian matrix figure saved as:')
+                    print(figurePath + "\\" + pName + ".html")
+                    print('-------------------------------')
+
+                    pName=IM_file_name[4].split('sc')[0]+"allSC"
+                    fig5.write_html(figurePath + "\\" + pName + ".html")
+                    print('Jacobian matrix figure saved as:')
+                    print(figurePath + "\\" + pName + ".html")
+                    print('-------------------------------')
+
+                    if len(Z)>5:
+                        pName=IM_file_name[5].split('sc')[0]+"allSC"
+                        print(pName)
+                        print(figurePath + "\\" + pName + ".html")
+                        fig6.write_html(figurePath + "\\" + pName + ".html")
+                        print('Zab passivity saved as:')
+                        print(figurePath + "\\" + pName + ".html")
+                        print('-------------------------------')
+
+                        pName=IM_file_name[6].split('sc')[0]+"allSC"
+                        fig7.write_html(figurePath + "\\" + pName + ".html")
+                        print('Zdq passivity saved as:')
+                        print(figurePath + "\\" + pName + ".html")
+                        print('-------------------------------')
+            elif settings["Terminal type"]=="DC":
+                pName=IM_file_name[1].split('sc')[0]+"allSC"
+                print(pName)
+                print(figurePath + "\\" + pName + ".html")
+                fig6.write_html(figurePath + "\\" + pName + ".html")
+                print('Zab passivity saved as:')
+                print(figurePath + "\\" + pName + ".html")
+                print('-------------------------------')
+
+          
         
 def adjust_freq_range_SISO(fig,f_low,f_high,logaxis=True):
     if log_axis==False:
@@ -1033,6 +1620,7 @@ def adjust_freq_range_MIMO(fig,f_low,f_high,logaxis=False):
             xaxis8=dict(type='log',range=[np.log10(f_low),np.log10(f_high)]),
             )
         
+
 # =============================================================================
 # Run function definition
 # =============================================================================
@@ -1046,7 +1634,7 @@ def run(settings, DUT_plot=True, NET_plot=True, log_axis=True, dB_unit=True, unw
     if Single_plot:
         if int(settings["Nr scenarios"])>1:
             # plot multiple scenario data in one plot
-            Multi_SC_plot(settings, simPath, DUT_plot=True, NET_plot=False, log_axis=True, dB_unit=dB_unit, unwrap_on=unwrap_on) 
+            Multi_SC_plot(settings, simPath, DUT_plot=True, NET_plot=settings["Calculate NET"], log_axis=True, dB_unit=dB_unit, unwrap_on=unwrap_on) 
         else:
             sc_name = ""
             # plot one scenatio data in one plot

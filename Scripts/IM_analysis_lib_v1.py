@@ -4,10 +4,15 @@ Created on Fri Jul 21 09:29:05 2023
 
 @author: Yicheng Liao (YLI), Energinet
 
-Immitance analysis library - v1
+Immitance analysis library - v1.3
 
 Update history:
     21 Mar 2025 - v1 - first public version
+    21 Jul 2025 - v1.1 - comment some details for output information 
+    15 Oct 2025 - v1.2 - update Jacobian matrix calculation including conversion to P-f form
+    12 Mar 2026 - v1.3 - "MIMO impedance passivity" added
+                       - update Jacobian matrix calculation including conversion to P-df/dt form
+    
     
 """
 import cmath
@@ -520,6 +525,7 @@ def TF_eig_participation(TF_eigval,TF_eigvec):
 
 # Convert Zdq to P (Jacobian matrix)
 # Update: 19 April 2024 - YLI - first version
+
 def Zdq2P(Zdq,Pss,Qss,Vss): 
     # Pss, Qss defined as current flowing into the component
     Pt = -Pss
@@ -540,6 +546,48 @@ def Zdq2P(Zdq,Pss,Qss,Vss):
    
     Kn_TF = TF(Zdq.f, Kn)
     return Kn_TF   
+
+# Convert Jacobian matrix from P-theta form to P-f and P-df/dt form
+# Update: 15 October 2025 - YLI - 1st version
+#         12 March 2026 - YLI - 2nd version, add conversion to P-df/dt form
+def P2P(Kn_Ptheta:TF): 
+    n_f = len(Kn_Ptheta.f) 
+    # n_rank = Zdq.values[0].shape[0]
+    Kn_Pf = []
+    Kn_Pdfdt = []
+       
+    for k in range(n_f):
+        Kn = Kn_Ptheta.values[k]
+        w = 2*np.pi*Kn_Ptheta.f[k]
+        Kn_Pf.append(np.array([[Kn[0,0]/(1j*w)*2*np.pi,Kn[0,1]],[Kn[1,0]/(1j*w)*2*np.pi,Kn[1,1]]]))
+        Kn_Pdfdt.append(np.array([[Kn[0,0]/(1j*w)*2*np.pi/(1j*w),Kn[0,1]],[Kn[1,0]/(1j*w)*2*np.pi/(1j*w),Kn[1,1]]]))
+
+   
+    Kn2_TF = TF(Kn_Ptheta.f, Kn_Pf)
+    Kn3_TF = TF(Kn_Ptheta.f, Kn_Pdfdt)
+    return Kn2_TF, Kn3_TF   
+
+
+
+# MIMO impedance passivity
+# Update: 19 April 2024 - YLI - first version
+def Passvity_ZMIMO(Z): 
+   
+    n_f = len(Z.f) 
+    # n_rank = Zdq.values[0].shape[0]
+    Pidx = []
+       
+    for k in range(n_f):
+        Zmat = Z.values[k]
+        a = np.real(Zmat[0,0])
+        b = 1/2*(Zmat[0,1]+np.conjugate(Zmat[1,0]))
+        c = np.real(Zmat[1,1])
+        pidx_min = (a+c-np.sqrt((a+c)*(a+c)-4*(a*c-b*np.conjugate(b))))/2
+        Pidx.append(pidx_min)
+        
+   
+    Pidx_TF = TF(Z.f, Pidx)
+    return Pidx_TF   
 
 """
 ===================================================================================
@@ -597,14 +645,11 @@ def IMTB_AC_immittace_toCSV(filename,str_list,data_list):
 def IM_read_CSV(filename):    
     df = pd.read_csv(filename)
     h1 = [column.split('_', 1)[0] for column in df.columns]
-    print(h1)
     h2 = [column.split('_', 1)[-1] for column in df.columns]
-    print(h2)
+
     h1[0] = 'f'
     h2[0] = 'Hz'
     df.columns = [h1,h2]
-    # print(h1)
-    # print(h2)
     
     var_set = []     
     Z_TF = {}
@@ -624,7 +669,6 @@ def IM_read_CSV(filename):
                 Z_re = np.asarray(pd.DataFrame(df[h,'ab_11_re']))
                 Z_im = np.asarray(pd.DataFrame(df[h,'ab_11_im']))
                 Z11 = Z_re + 1j*Z_im
-                # print(Z11[1][0])
 
                 
                 Z_re = np.asarray(pd.DataFrame(df[h,'ab_12_re']))
@@ -658,7 +702,6 @@ def IM_read_CSV(filename):
                 Z_re = np.asarray(pd.DataFrame(df[h,'dq_11_re']))
                 Z_im = np.asarray(pd.DataFrame(df[h,'dq_11_im']))
                 Z11 = Z_re + 1j*Z_im
-                # print(Z11[1][0])
 
                 
                 Z_re = np.asarray(pd.DataFrame(df[h,'dq_12_re']))
@@ -679,6 +722,25 @@ def IM_read_CSV(filename):
                 Z_TF[h] = TF(flist,Zlist)        
                 var_set.append(h)
         return Z_TF
+    elif '_passivity_' in filename:
+        for idx,h in enumerate(h1):
+            if idx == 0:
+                freq = np.asarray(pd.DataFrame(df[h,h2[idx]]))
+                flist = []
+                for n in range(len(freq)):
+                    flist.append(freq[n][0])
+            elif h not in var_set:
+                Z_re = np.asarray(pd.DataFrame(df[h,'re']))
+                Z = Z_re 
+
+                Zlist = []
+                for n in range(len(flist)):
+                    Zlist.append(Z[n][0])
+                
+                
+                Z_TF[h] = TF(flist,Zlist)
+                var_set.append(h)
+        return Z_TF
     elif 'IM_pos_' in filename:
         
         for idx,h in enumerate(h1):
@@ -691,7 +753,7 @@ def IM_read_CSV(filename):
                 Z_re = np.asarray(pd.DataFrame(df[h,'re']))
                 Z_im = np.asarray(pd.DataFrame(df[h,'im']))
                 Z = Z_re + 1j*Z_im
-                # print(Z)
+
                 Zlist = []
                 for n in range(len(flist)):
                     Zlist.append(Z[n][0])
@@ -703,7 +765,7 @@ def IM_read_CSV(filename):
         
         return Z_TF 
             
-    elif 'IM_Kn_' in filename:
+    elif 'IM_Kn_' in filename or 'IM_Kn2_' in filename or 'IM_Kn3_' in filename:
         for idx,h in enumerate(h1):
             if idx == 0:
                 freq = np.asarray(pd.DataFrame(df[h,h2[idx]]))
@@ -715,7 +777,6 @@ def IM_read_CSV(filename):
                 Z_re = np.asarray(pd.DataFrame(df[h,'11_re']))
                 Z_im = np.asarray(pd.DataFrame(df[h,'11_im']))
                 Z11 = Z_re + 1j*Z_im
-                # print(Z11[1][0])
 
                 
                 Z_re = np.asarray(pd.DataFrame(df[h,'12_re']))
@@ -735,10 +796,10 @@ def IM_read_CSV(filename):
                                                    
                 Z_TF[h] = TF(flist,Zlist)        
                 var_set.append(h)
+        
                 
         return Z_TF
     elif "IM_Zdc_MIMO" in filename:
-        
         for idx,h in enumerate(h1):
             if idx == 0:
                 freq = np.asarray(pd.DataFrame(df[h,h2[idx]]))
@@ -746,11 +807,10 @@ def IM_read_CSV(filename):
                 for n in range(len(freq)):
                     flist.append(freq[n][0])
             elif h not in var_set:
-                
+                        
                 Z_re = np.asarray(pd.DataFrame(df[h,'dc_11_re']))
                 Z_im = np.asarray(pd.DataFrame(df[h,'dc_11_im']))
                 Z11 = Z_re + 1j*Z_im
-                # print(Z11[1][0])
 
                 
                 Z_re = np.asarray(pd.DataFrame(df[h,'dc_12_re']))
@@ -785,7 +845,6 @@ def IM_read_CSV(filename):
                 Z_re = np.asarray(pd.DataFrame(df[h,'re']))
                 Z_im = np.asarray(pd.DataFrame(df[h,'im']))
                 Z = Z_re + 1j*Z_im
-                # print(Z11[1][0])
 
                 Zlist = []
                 for n in range(len(flist)):

@@ -6,6 +6,12 @@ Immitance calculation subscript of IMTB
 
 Update history:
     21 Mar 2025 - v1.0 - first public version
+    21 Jul 2025 - v1.1 - update plot time step check, in case scripts cannot change this parameter in some user models
+    15 Oct 2025 - v1.2 - update Jacobian matrix calculation, including P-f scan
+    12 Mar 2026 - v1.3rc - update Jacobian matrix calculation, including P-df/dt scan
+                         - add MIMO passivity calculation
+    30 Jul 2026 - v1.3 - bug fix for frequency rounding issue, enabling scan settings using floating number resolution. 
+
     
 """
 
@@ -183,10 +189,25 @@ def get_time_idxs(settings, filepath):
     
     settl_time = settings["Settling time"]
     inj_time = settings["Injection time"]
-    timestep = settings["Plot timestep"]*1e-6
+    timestep = round(settings["Plot timestep"]*1e-6,ROUNDING_TO_EXP_TIME)
         
     # round the time array
     time = [round(x,ROUNDING_TO_EXP_TIME) for x in data]
+    
+    # check timestep is correctly set by GUI or not
+    # if not, update timestep and sampling frequency based on simulation data
+    if round(time[1]-time[0],ROUNDING_TO_EXP_TIME) != round(timestep,ROUNDING_TO_EXP_TIME):
+        timestep = round(time[1]-time[0],ROUNDING_TO_EXP_TIME)
+        settings["fs"] = round(1/timestep,ROUNDING_TO_EXP_FREQ)
+        print("-------------------------------")
+        print("REMARK: ")
+        print("Plot timestep from GUI setting is: " + str(round(settings["Plot timestep"]*1e-6,ROUNDING_TO_EXP_TIME)) +" s")
+        print("Plot timestep from actual simulation is: "+str(timestep) + " s")
+        print("Corresponding Nyquist frequency of the actual plot timestep is: "+str(round(0.5/timestep,ROUNDING_TO_EXP_FREQ))+" Hz")
+        print("Plot timestep is not set correctly by scripts from the GUI setting. Impedance calculation is thus performed based on actual plot timestep from the simulation data. There might be risk that the frequency scan results is not correct. Please double check with 'Plot harmonics' function if the FFT can correctly analyze the fundamental frequency component or not.")
+        print("Be aware of the maximum stop frequency given the actual simulation plot timestep. The maximum stop frequency shall NOT be higher than then Nyquist freqeuncy of the actual plot timestep.")
+        print("-------------------------------")
+
     
     time_start = round(snap_time + settl_time + timestep, ROUNDING_TO_EXP_TIME)
     time_end = round(snap_time + settl_time + inj_time, ROUNDING_TO_EXP_TIME)
@@ -953,8 +974,8 @@ def get_Yf(f,fs,y_window):
         # Y_f = IM.get_FFT_at_f_v2(f_fft, Y_fft, f)
     
         # Using DFT at single frequency
-        Y_f = IM.DFT_1f(y_window, fs, f) # new version
-        
+        f_rounded = round(f,ROUNDING_TO_EXP_FREQ)
+        Y_f = IM.DFT_1f(y_window, fs, f_rounded) # new version
         
         return Y_f
 
@@ -1076,10 +1097,6 @@ def IMTB_AC_Zab_MIMO(data_pos, data_neg, f, phi_f0, settings, calc_NET=False):
     fs = settings["fs"]
     f0 = float(settings["Fundamental freq"])
     
-        
-    fs = settings["fs"]
-    f0 = float(settings["Fundamental freq"])
-    
     if calc_NET:
         print('NET side impedance calculation:')
         ialpha1 = _get_alpha(data_pos[6], data_pos[7], data_pos[8])
@@ -1119,11 +1136,10 @@ def IMTB_AC_Zab_MIMO(data_pos, data_neg, f, phi_f0, settings, calc_NET=False):
     
     Vmat = np.array([[Vab1_inj1,Vab1_inj2],[Vab2_inj1,Vab2_inj2]]) 
     Imat = np.array([[Iab1_inj1,Iab1_inj2],[Iab2_inj1,Iab2_inj2]]) 
-    # print(Vmat)
-    # print(Imat)
-    
+
+   
     Zab = np.matmul(Vmat,lnlg.inv(Imat))
-    # print(Zab)
+
     
     return Zab
 
@@ -1132,7 +1148,7 @@ def IMTB_AC_Zdq_MIMO(data_pos, data_neg, f, phi_f0, settings, calc_NET=False):
     fs = settings["fs"]
     f0 = float(settings["Fundamental freq"])
     # time_start = settings["time_start"]
-    # print(f0)
+
     if calc_NET:
         print('NET side impedance calculation:')
         ialpha1 = _get_alpha(data_pos[6], data_pos[7], data_pos[8])
@@ -1155,7 +1171,8 @@ def IMTB_AC_Zdq_MIMO(data_pos, data_neg, f, phi_f0, settings, calc_NET=False):
         ibeta2 = _get_beta(data_neg[0], data_neg[1], data_neg[2])
         valpha2 = _get_alpha(data_neg[3], data_neg[4], data_neg[5])
         vbeta2 = _get_beta(data_neg[3], data_neg[4], data_neg[5])
-    
+
+
     # V at pos scan - 1st inj
     Vd_inj1,Vq_inj1,phi_f0_cmp = get_Ydq_real_vector(f-f0, f0, phi_f0, fs, valpha1, vbeta1,calc_Vq = True)
     
@@ -1462,8 +1479,8 @@ def Single_IM_calc(rawfolder, sc_name, f_inj, settings, DQ_calc):
             
             
             # calculate MIMO models
-            print("Responses at the following frequency points will be calculated.")
-            print(f_inj[1:])
+            # print("Responses at the following frequency points will be calculated.")
+            # print(f_inj[1:])
             
             Zab_dut = []
             Zdq_dut = []
@@ -1667,8 +1684,8 @@ def Single_IM_calc(rawfolder, sc_name, f_inj, settings, DQ_calc):
                 Qss_net = np.imag(S_f0_net)
                 
             # calculate MIMO models
-            print("Responses at the following frequency points (dq frame) will be calculated.")
-            print(f_inj[1:])
+            # print("Responses at the following frequency points (dq frame) will be calculated.")
+            # print(f_inj[1:])
             
             Zab_dut = []
             Zdq_dut = []
@@ -1809,8 +1826,8 @@ def Single_IM_calc(rawfolder, sc_name, f_inj, settings, DQ_calc):
             
             
             # calculate MIMO models
-            print("Responses at the following frequency points will be calculated.")
-            print(f_inj[1:])
+            # print("Responses at the following frequency points will be calculated.")
+            # print(f_inj[1:])
             
             Zdc_dut = []
             if settings["Calculate NET"]:
@@ -1869,10 +1886,16 @@ def Single_IM_calc(rawfolder, sc_name, f_inj, settings, DQ_calc):
             Zab_dut_TF = IM.TF(fab_list,Zab_dut)
             Zdq_dut_TF = IM.TF(fdq_list,Zdq_dut)
             Kn_dut_TF = IM.Zdq2P(Zdq_dut_TF, Pss, Qss, Vss)
+            Kn2_dut_TF,Kn3_dut_TF = IM.P2P(Kn_dut_TF)
+            Pidx_Zab_dut_TF = IM.Passvity_ZMIMO(Zab_dut_TF)
+            Pidx_Zdq_dut_TF = IM.Passvity_ZMIMO(Zdq_dut_TF)
             if settings["Calculate NET"]:
                 Zab_net_TF = IM.TF(fab_list,Zab_net)
                 Zdq_net_TF = IM.TF(fdq_list,Zdq_net)
                 Kn_net_TF = IM.Zdq2P(Zdq_net_TF, Pss_net, Qss_net, Vss_net)
+                Kn2_net_TF,Kn3_net_TF = IM.P2P(Kn_net_TF)
+                Pidx_Zab_net_TF = IM.Passvity_ZMIMO(Zab_net_TF)
+                Pidx_Zdq_net_TF = IM.Passvity_ZMIMO(Zdq_net_TF)
 
             print('MIMO impedances and tranfer matrix calculation is done. Saving results...')
             
@@ -1916,7 +1939,6 @@ def Single_IM_calc(rawfolder, sc_name, f_inj, settings, DQ_calc):
             IM_data_ab = IM.IMTB_AC_immittace_toCSV(IM_csv_file, IM_str, IM_list)
             print('Alpha-beta impedance data has been saved in:')
             print(IM_csv_file)
-            # print(IM_csv_file.replace(".csv", ".xlsx"))
             
             # data preparation for saving Zdq
             Z11 = []
@@ -1936,7 +1958,6 @@ def Single_IM_calc(rawfolder, sc_name, f_inj, settings, DQ_calc):
                 Z21_net = []
                 Z22_net = []
                 for Zk in Zdq_net_TF.values:
-                    # print(Zk)
                     Z11_net.append(Zk[0][0])
                     Z12_net.append(Zk[0][1])
                     Z21_net.append(Zk[1][0])
@@ -1962,7 +1983,6 @@ def Single_IM_calc(rawfolder, sc_name, f_inj, settings, DQ_calc):
             IM_data_dq = IM.IMTB_AC_immittace_toCSV(IM_csv_file, IM_str, IM_list)
             print('DQ impedance data has been saved in:')
             print(IM_csv_file)
-            # print(IM_csv_file.replace(".csv", ".xlsx"))    
             
             # # data preparation for saving Kn
             Z11 = []
@@ -2000,27 +2020,178 @@ def Single_IM_calc(rawfolder, sc_name, f_inj, settings, DQ_calc):
             else:
                 IM_str = ['f','Kdut_11','Kdut_12','Kdut_21','Kdut_22']
                 IM_list = [Kn_dut_TF.f,Z11,Z12,Z21,Z22]
-                
+            
+            IM_data_Kn = IM.IMTB_AC_immittace_toCSV(IM_csv_file, IM_str, IM_list)
+            print('Jacobian matrix data (P-theta relationship) has been saved in:')
+            print(IM_csv_file)
+
+            # # data preparation for saving Kn2
+            Z11 = []
+            Z12 = []
+            Z21 = []
+            Z22 = []
+            for Zk in Kn2_dut_TF.values:
+                Z11.append(Zk[0][0])
+                Z12.append(Zk[0][1])
+                Z21.append(Zk[1][0])
+                Z22.append(Zk[1][1])
+            
+            if settings["Calculate NET"]: 
+                # data preparation for saving Kn
+                Z11_net = []
+                Z12_net = []
+                Z21_net = []
+                Z22_net = []
+                for Zk in Kn2_net_TF.values:
+                    Z11_net.append(Zk[0][0])
+                    Z12_net.append(Zk[0][1])
+                    Z21_net.append(Zk[1][0])
+                    Z22_net.append(Zk[1][1])
+                 
+            
+            # save to IM CSV file
+            IM_csvname = "IM_Kn2_MIMO_" + settings["simname"]+ "_" + sc_name + settings["Injection components"]  + ".csv"
+            IM_csv_file = (settings["Working folder"] + "\\IMTB_data\\" + 
+                        settings["Timestamp"] + "_" + settings["simname"] + "\\" +
+                        IM_csvname)
+            
+            if settings["Calculate NET"]: 
+                IM_str = ['f','Kdut_11','Kdut_12','Kdut_21','Kdut_22','Knet_11','Knet_12','Knet_21','Knet_22']
+                IM_list = [Kn_dut_TF.f,Z11,Z12,Z21,Z22,Z11_net,Z12_net,Z21_net,Z22_net]
+            else:
+                IM_str = ['f','Kdut_11','Kdut_12','Kdut_21','Kdut_22']
+                IM_list = [Kn_dut_TF.f,Z11,Z12,Z21,Z22]    
             
     
-            IM_data_Kn = IM.IMTB_AC_immittace_toCSV(IM_csv_file, IM_str, IM_list)
-            print('Jacobian matrix data has been saved in:')
+            IM_data_Kn2 = IM.IMTB_AC_immittace_toCSV(IM_csv_file, IM_str, IM_list)
+            print('Jacobian matrix data (P-f relationship) has been saved in:')
             print(IM_csv_file)
-            # print(IM_csv_file.replace(".csv", ".xlsx")) 
+             
+
+            # # data preparation for saving Kn3
+            Z11 = []
+            Z12 = []
+            Z21 = []
+            Z22 = []
+            for Zk in Kn3_dut_TF.values:
+                Z11.append(Zk[0][0])
+                Z12.append(Zk[0][1])
+                Z21.append(Zk[1][0])
+                Z22.append(Zk[1][1])
+            
+            if settings["Calculate NET"]: 
+                # data preparation for saving Kn
+                Z11_net = []
+                Z12_net = []
+                Z21_net = []
+                Z22_net = []
+                for Zk in Kn3_net_TF.values:
+                    Z11_net.append(Zk[0][0])
+                    Z12_net.append(Zk[0][1])
+                    Z21_net.append(Zk[1][0])
+                    Z22_net.append(Zk[1][1])
+                 
+            
+            # save to IM CSV file
+            IM_csvname = "IM_Kn3_MIMO_" + settings["simname"]+ "_" + sc_name + settings["Injection components"]  + ".csv"
+            IM_csv_file = (settings["Working folder"] + "\\IMTB_data\\" + 
+                        settings["Timestamp"] + "_" + settings["simname"] + "\\" +
+                        IM_csvname)
+            
+            if settings["Calculate NET"]: 
+                IM_str = ['f','Kdut_11','Kdut_12','Kdut_21','Kdut_22','Knet_11','Knet_12','Knet_21','Knet_22']
+                IM_list = [Kn3_dut_TF.f,Z11,Z12,Z21,Z22,Z11_net,Z12_net,Z21_net,Z22_net]
+            else:
+                IM_str = ['f','Kdut_11','Kdut_12','Kdut_21','Kdut_22']
+                IM_list = [Kn3_dut_TF.f,Z11,Z12,Z21,Z22]    
+            
+    
+            IM_data_Kn3 = IM.IMTB_AC_immittace_toCSV(IM_csv_file, IM_str, IM_list)
+            print('Jacobian matrix data (P-df/dt relationship) has been saved in:')
+            print(IM_csv_file)
+
+
+
+            # # data preparation for saving Passivity index - Zab
+            Pidx = []
+
+            for Pk in Pidx_Zab_dut_TF.values:
+                Pidx.append(Pk)
+            
+            if settings["Calculate NET"]: 
+                # data preparation for saving passivity index - Zab
+                Pidx_net = []
+
+                for Pk in Pidx_Zab_net_TF.values:
+                    Pidx_net.append(Pk)
+                 
+            
+            # save to IM CSV file
+            IM_csvname = "IM_Zab_passivity_" + settings["simname"]+ "_" + sc_name + settings["Injection components"]  + ".csv"
+            IM_csv_file = (settings["Working folder"] + "\\IMTB_data\\" + 
+                        settings["Timestamp"] + "_" + settings["simname"] + "\\" +
+                        IM_csvname)
+            
+            if settings["Calculate NET"]: 
+                IM_str = ['f','Pidxdut','Pidxnet']
+                IM_list = [Pidx_Zab_dut_TF.f,Pidx,Pidx_net]
+            else:
+                IM_str = ['f','Pidxdut']
+                IM_list = [Pidx_Zab_dut_TF.f,Pidx]   
+            
+    
+            IM_data_Pidx_Zab = IM.IMTB_AC_immittace_toCSV(IM_csv_file, IM_str, IM_list)
+            print('Impedance passivity index for Zab has been saved in:')
+            print(IM_csv_file) 
+
+            # # data preparation for saving Passivity index - Zdq
+            Pidx = []
+
+            for Pk in Pidx_Zdq_dut_TF.values:
+                Pidx.append(Pk)
+            
+            if settings["Calculate NET"]: 
+                # data preparation for saving passivity index - Zdq
+                Pidx_net = []
+
+                for Pk in Pidx_Zdq_net_TF.values:
+                    Pidx_net.append(Pk)
+                 
+            
+            # save to IM CSV file
+            IM_csvname = "IM_Zdq_passivity_" + settings["simname"]+ "_" + sc_name + settings["Injection components"]  + ".csv"
+            IM_csv_file = (settings["Working folder"] + "\\IMTB_data\\" + 
+                        settings["Timestamp"] + "_" + settings["simname"] + "\\" +
+                        IM_csvname)
+            
+            if settings["Calculate NET"]: 
+                IM_str = ['f','Pidxdut','Pidxnet']
+                IM_list = [Pidx_Zdq_dut_TF.f,Pidx,Pidx_net]
+            else:
+                IM_str = ['f','Pidxdut']
+                IM_list = [Pidx_Zdq_dut_TF.f,Pidx]   
+            
+    
+            IM_data_Pidx_Zdq = IM.IMTB_AC_immittace_toCSV(IM_csv_file, IM_str, IM_list)
+            print('Impedance passivity index for Zdq has been saved in:')
+            print(IM_csv_file) 
+
        
-            return IM_data_ab, IM_data_dq, IM_data_Kn
+            return IM_data_ab, IM_data_dq, IM_data_Kn, IM_data_Kn2,IM_data_Kn3, IM_data_Pidx_Zab, IM_data_Pidx_Zdq
         else:
             # FOR DC MIMO CALCULATION
             # get Zdc in TF forms
             Zdc_dut_TF = IM.TF(fdc_list,Zdc_dut)
+            Pidx_Zdc_dut_TF = IM.Passvity_ZMIMO(Zdc_dut_TF)
             if settings["Calculate NET"]:
                 Zdc_net_TF = IM.TF(fdc_list,Zdc_net)
+                Pidx_Zdc_net_TF = IM.Passvity_ZMIMO(Zdc_net_TF)
             
             
             print('MIMO impedances and tranfer matrix calculation is done. Saving results...')
     
             
-            # data preparation for saving Zab
+            # data preparation for saving Zdc
             Z11 = []
             Z12 = []
             Z21 = []
@@ -2059,10 +2230,41 @@ def Single_IM_calc(rawfolder, sc_name, f_inj, settings, DQ_calc):
             IM_data_dc = IM.IMTB_AC_immittace_toCSV(IM_csv_file, IM_str, IM_list)
             print('DC MIMO impedance data has been saved in:')
             print(IM_csv_file)
-            # print(IM_csv_file.replace(".csv", ".xlsx"))
             
+            # # data preparation for saving Passivity index - Zdc
+            Pidx = []
+
+            for Pk in Pidx_Zdc_dut_TF.values:
+                Pidx.append(Pk)
             
-            return IM_data_dc
+            if settings["Calculate NET"]: 
+                # data preparation for saving passivity index - Zdc
+                Pidx_net = []
+
+                for Pk in Pidx_Zdc_net_TF.values:
+                    Pidx_net.append(Pk)
+                 
+            
+            # save to IM CSV file
+            IM_csvname = "IM_Zdc_passivity_" + settings["simname"]+ "_" + sc_name + settings["Injection components"]  + ".csv"
+            IM_csv_file = (settings["Working folder"] + "\\IMTB_data\\" + 
+                        settings["Timestamp"] + "_" + settings["simname"] + "\\" +
+                        IM_csvname)
+            
+            if settings["Calculate NET"]: 
+                IM_str = ['f','Pidxdut','Pidxnet']
+                IM_list = [Pidx_Zdc_dut_TF.f,Pidx,Pidx_net]
+            else:
+                IM_str = ['f','Pidxdut']
+                IM_list = [Pidx_Zdc_dut_TF.f,Pidx]   
+            
+    
+            IM_data_Pidx_Zdc = IM.IMTB_AC_immittace_toCSV(IM_csv_file, IM_str, IM_list)
+            print('Impedance passivity index for Zdc has been saved in:')
+            print(IM_csv_file) 
+
+            
+            return IM_data_dc, IM_data_Pidx_Zdc
         
          
 
